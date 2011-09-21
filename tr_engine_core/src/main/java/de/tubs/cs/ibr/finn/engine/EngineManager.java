@@ -1,6 +1,5 @@
 package de.tubs.cs.ibr.finn.engine;
 
-import eu.funinnumbers.hal.station.rmi.HallwayStationInterface;
 import eu.funinnumbers.station.rmi.StationInterface;
 
 /**
@@ -50,9 +49,9 @@ public final class EngineManager {
     /**
      * TODO: Find the correct IF.
      */
-    public HallwayStationInterface getStationInterface() {
+    public StationInterface getStationInterface() {
         for (StationInterface stationInterface : thisEngine.getStationInterface()) {
-            return (HallwayStationInterface) stationInterface;
+            return (StationInterface) stationInterface;
         }
         return null;
     }
