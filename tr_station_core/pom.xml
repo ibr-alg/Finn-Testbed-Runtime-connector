@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>tr_finn_station</artifactId>
+        <groupId>de.tubs.cs.ibr</groupId>
+        <version>1.0</version>
+    </parent>
+
+    <groupId>de.tubs.cs.ibr</groupId>
+    <artifactId>tr_station_core</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.google.protobuf.tools</groupId>
+                <artifactId>maven-protoc-plugin</artifactId>
+                <version>0.1.8</version>
+                <configuration>
+                    <protocExecutable>/usr/local/bin/protoc</protocExecutable>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2-beta-5</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>eu.funinnumbers.hal.station.HALStationApp</mainClass>
+                        </manifest>
+                    </archive>
+
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <!-- this is used for inheritance merges -->
+                        <phase>package</phase>
+                        <!-- append to the packaging phase. -->
+                        <goals>
+                            <!--suppress MavenModelInspection -->
+                            <goal>single</goal>
+                            <!-- goals == mojos -->
+                        </goals>
+                    </execution>
+
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.tubs.cs.ibr</groupId>
+            <artifactId>CoCoSFrontend</artifactId>
+            <version>[2.1,)</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.funinnumbers</groupId>
+            <artifactId>Station</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.funinnumbers</groupId>
+            <artifactId>StationCommon</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.funinnumbers</groupId>
+            <artifactId>ModelStation</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>de.uniluebeck.itm.netty.handlerstack</groupId>
+            <artifactId>factory</artifactId>
+            <version>1.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.uniluebeck.itm.netty.handlerstack</groupId>
+            <artifactId>protocol-collection</artifactId>
+            <version>1.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.uniluebeck.itm.netty.handlerstack</groupId>
+            <artifactId>netty-handlerstack</artifactId>
+            <version>1.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.uniluebeck.itm.netty-wisebed</groupId>
+            <artifactId>netty-wisebed</artifactId>
+            <version>0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <artifactId>Tile_Localization_Protocoll</artifactId>
+            <groupId>de.tubs.cs.ibr</groupId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
+
+</project>

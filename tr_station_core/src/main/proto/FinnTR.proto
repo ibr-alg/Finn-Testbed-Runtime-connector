@@ -1,0 +1,16 @@
+package  controller;
+
+option java_package = "de.tubs.cs.ibr.finn.station";
+option java_outer_classname = "FinnTrProtocol";
+
+
+message command{
+    optional int32 id = 1;
+    optional int32 destination = 2;
+    optional bytes bytes = 3;
+}
+
+message Envelope{
+    optional int32 id = 1;
+    optional int32 command = 2;
+}
