@@ -3,7 +3,6 @@ package de.tubs.cs.ibr.finn.station;
 import eu.funinnumbers.engine.event.EventForwarder;
 import eu.funinnumbers.engine.rmi.SGEngineInterface;
 import eu.funinnumbers.station.AbstractStationApp;
-import eu.funinnumbers.station.rmi.StationInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +16,7 @@ import java.rmi.RemoteException;
  * Time: 18:45
  * To change this template use File | Settings | File Templates.
  */
-public class GenericFinnStation extends AbstractStationApp implements FinnTRStation{
+public class GenericFinnStation extends AbstractStationApp {
     private static final Logger logger = LoggerFactory.getLogger(GenericFinnStation.class);
 
     protected SGEngineInterface engine;
@@ -47,18 +46,21 @@ public class GenericFinnStation extends AbstractStationApp implements FinnTRStat
         this.engine = engine;
     }
 
-    public void register_Station(StationInterface station)
+    public void register_Station(FinnRemoteInterface station)
             throws RemoteException {
         //Register Station to Engine
-        engine.registerStation(getMyIP(), station);
-    }
-
-    @Override
-    public void handle(FinnTrProtocol.Envelope command) {
-        connector.handle(command);
+        engine.registerStation(getMyIP(), station); 
     }
 
     public GenericFinnStation(TestbedConnector connector) {
+        this.connector = connector;
+    }
+
+    public TestbedConnector getConnector() {
+        return connector;
+    }
+
+    public void setConnector(TestbedConnector connector) {
         this.connector = connector;
     }
 }

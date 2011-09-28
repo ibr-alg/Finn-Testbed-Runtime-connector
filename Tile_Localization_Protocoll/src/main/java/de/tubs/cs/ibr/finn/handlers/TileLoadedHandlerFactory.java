@@ -1,4 +1,4 @@
-package de.tubs.cs.ibr.finn;
+package de.tubs.cs.ibr.finn.handlers;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;

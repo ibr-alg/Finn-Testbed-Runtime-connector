@@ -1,8 +1,9 @@
-package de.tubs.cs.ibr;
+package de.tubs.cs.ibr.finn.station;
 
 import com.google.common.collect.Lists;
-import de.tubs.cs.ibr.finn.station.GenericFinnStation;
-import de.tubs.cs.ibr.finn.station.TestbedConnector;
+import de.tubs.cs.ibr.finn.handlers.TileLoadedHandler;
+import de.uniluebeck.itm.netty.handlerstack.isense.ISensePacketDecoder;
+import de.uniluebeck.itm.netty.handlerstack.isense.ISensePacketEncoder;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
@@ -12,11 +13,16 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.helpers.Loader;
+import org.jboss.netty.channel.ChannelPipeline;
+import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.rmi.RemoteException;
 import java.util.List;
+
+import static org.jboss.netty.channel.Channels.pipeline;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,7 +34,7 @@ import java.util.List;
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
-       static final Options options = new Options();
+    static final Options options = new Options();
 
 
     static {
@@ -61,7 +67,7 @@ public class Main {
 // Application logic
 //--------------------------------------------------------------------------
 
-                configureLoggingDefaults();
+        configureLoggingDefaults();
         final org.slf4j.Logger log = LoggerFactory.getLogger(Main.class);
 
         // Create a handler factory and populate it with all MOVEDETECT factories
@@ -106,13 +112,13 @@ public class Main {
                 throw new Exception("Please supply -H");
             }
 
-             if (line.hasOption('p')) {
+            if (line.hasOption('p')) {
                 protobufPort = Integer.parseInt(line.getOptionValue('p'));
             } else {
                 throw new Exception("Please supply -p");
             }
 
-             if (line.hasOption('r')) {
+            if (line.hasOption('r')) {
                 secretReservationKeys = line.getOptionValue('r');
             } else {
                 throw new Exception("Please supply -r");
@@ -121,9 +127,9 @@ public class Main {
             if (line.hasOption('f')) {
                 xmlConfigFile = new File(line.getOptionValue('f'));
             } else {
-                try{
+                try {
                     xmlConfigFile = new File(Loader.getResource("finn-handler-stack.xml").toURI());
-                }catch (Exception e){
+                } catch (Exception e) {
                     throw new Exception("loading default handlers failed, Please supply -f");
                 }
             }
@@ -134,26 +140,49 @@ public class Main {
             System.exit(1);
         }
 
-        GenericFinnStation station = new GenericFinnStation(new TestbedConnector(protobufHost,protobufPort,secretReservationKeys,xmlConfigFile));
+        GenericFinnStation station = new GenericFinnStation(
+                new TestbedConnector(protobufHost, protobufPort, secretReservationKeys, xmlConfigFile));
+        station.getConnector().getBootstrap().setPipelineFactory(
+                new ChannelPipelineFactory() {
+                    public ChannelPipeline getPipeline()
+                            throws Exception {
+                        final ChannelPipeline pipeline = pipeline();
+//                pipeline.addLast("dle-etx-decoder", new DleStxEtxFramingDecoder(null));
+//                pipeline.addLast("dle-etx-encoder", new DleStxEtxFramingEncoder(null));
+                        pipeline.addLast("isense-decoder", new ISensePacketDecoder());
+                        pipeline.addLast("isense-encoder", new ISensePacketEncoder());
+                        pipeline.addLast("Tile-Events-Handler", new TileLoadedHandler(null));
+                        return pipeline;
+                    }
+                });
+        ConnectorManager.getInstance().setConnector(station.getConnector());
+        station.getConnector().connect();
+        try {
+            station.register_Station(new ExampleStation());
+        } catch (RemoteException e) {
+            log.error("error registering station", e);
+        }
+
+
 
     }
 
     @SuppressWarnings("unused")
-	public static List<eu.wisebed.api.sm.SecretReservationKey> parseSecretReservationKeys(String str) {
-		String[] pairs = str.split(";");
-		List<eu.wisebed.api.sm.SecretReservationKey> keys = Lists.newArrayList();
-		for (String pair : pairs) {
-			String urnPrefix = pair.split(",")[0];
-			String secretReservationKeys = pair.split(",")[1];
-			eu.wisebed.api.sm.SecretReservationKey key = new eu.wisebed.api.sm.SecretReservationKey();
-			key.setUrnPrefix(urnPrefix);
-			key.setSecretReservationKey(secretReservationKeys);
-			keys.add(key);
-		}
-		return keys;
-	}
+    public static List<eu.wisebed.api.sm.SecretReservationKey> parseSecretReservationKeys(String str) {
+        String[] pairs = str.split(";");
+        List<eu.wisebed.api.sm.SecretReservationKey> keys = Lists.newArrayList();
+        for (String pair : pairs) {
+            String urnPrefix = pair.split(",")[0];
+            String secretReservationKeys = pair.split(",")[1];
+            eu.wisebed.api.sm.SecretReservationKey key = new eu.wisebed.api.sm.SecretReservationKey();
+            key.setUrnPrefix(urnPrefix);
+            key.setSecretReservationKey(secretReservationKeys);
+            keys.add(key);
+        }
+        return keys;
+    }
 
-        private static void usage(Options options) {
+    private static void usage(Options options) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp(120, Main.class.getCanonicalName(), null, options, null);
         System.exit(1);

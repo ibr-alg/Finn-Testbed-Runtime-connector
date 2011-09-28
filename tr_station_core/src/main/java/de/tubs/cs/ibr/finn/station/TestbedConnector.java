@@ -1,24 +1,14 @@
 package de.tubs.cs.ibr.finn.station;
 
-import de.tubs.cs.ibr.finn.TileLoadedHandlerFactory;
-import de.uniluebeck.itm.netty.handlerstack.FilterHandler;
-import de.uniluebeck.itm.netty.handlerstack.FilterPipeline;
-import de.uniluebeck.itm.netty.handlerstack.FilterPipelineImpl;
-import de.uniluebeck.itm.netty.handlerstack.HandlerFactoryRegistry;
-import de.uniluebeck.itm.netty.handlerstack.protocolcollection.ProtocolCollection;
 import de.uniluebeck.itm.nettywisebed.WisebedChannelFactory;
 import de.uniluebeck.itm.nettywisebed.WisebedTestbedAddress;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
 
 import java.io.File;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-
-import static org.jboss.netty.channel.Channels.pipeline;
 
 /**
  * Created by IntelliJ IDEA.
@@ -29,11 +19,11 @@ import static org.jboss.netty.channel.Channels.pipeline;
  */
 public class TestbedConnector {
     public void handle(FinnTrProtocol.Envelope command) {
-        //To change body of created methods use File | Settings | File Templates.
+        channel.write(command);
     }
 
     // Create a handler factory and populate it with all MOVEDETECT factories
-    HandlerFactoryRegistry factoryRegistry;
+//    HandlerFactoryRegistry factoryRegistry;
 
     // Options set from the command line
     private String protobufHost = null;
@@ -42,9 +32,9 @@ public class TestbedConnector {
     private File xmlConfigFile = null;
     private final Executor executorService;
     private ClientBootstrap bootstrap;
-    private FilterPipeline filterPipeline;
-    private final FilterHandler filterHandler;
-    private final Channel channel;
+//    private FilterPipeline filterPipeline;
+//    private final FilterHandler filterHandler;
+    private Channel channel;
 
 
     public TestbedConnector(String protobufHost, int protobufPort, String secretReservationKeys, File xmlConfigFile) {
@@ -53,64 +43,41 @@ public class TestbedConnector {
         this.secretReservationKeys = secretReservationKeys;
         this.xmlConfigFile = xmlConfigFile;
 
-        factoryRegistry = new HandlerFactoryRegistry();
-        ProtocolCollection.registerProtocols(factoryRegistry);
-        try {
-            factoryRegistry.register(new TileLoadedHandlerFactory());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+//        factoryRegistry = new HandlerFactoryRegistry();
+//        ProtocolCollection.registerProtocols(factoryRegistry);
+//        try {
+//            factoryRegistry.register(new TileLoadedHandlerFactory());
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
 
         executorService = Executors.newCachedThreadPool();
 		bootstrap = new ClientBootstrap(new WisebedChannelFactory(executorService, executorService));
 
-        filterPipeline = new FilterPipelineImpl();
-        try {
-            filterPipeline.setChannelPipeline(factoryRegistry.create(this.xmlConfigFile));
-        } catch (Exception e) {
-            System.out.println("Unable to initialize HandlerFactoryRegistry from supplied config File");
-            System.exit(1);
-        }
+//        filterPipeline = new FilterPipelineImpl();
+//        try {
+//            filterPipeline.setChannelPipeline(factoryRegistry.create(this.xmlConfigFile));
+//        } catch (Exception e) {
+//            System.out.println("Unable to initialize HandlerFactoryRegistry from supplied config File");
+//            System.exit(1);
+//        }
+//
+//        filterHandler = new FilterHandler(filterPipeline);
+//
+//		bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
+//            @Override
+//            public ChannelPipeline getPipeline() throws Exception {
+//                final ChannelPipeline pipeline = pipeline();
+//                pipeline.addLast("filterHandler", filterHandler);
+//
+//
+//                return pipeline;
+//            }
+//        });
 
-        filterHandler = new FilterHandler(filterPipeline);
+    }
 
-		bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
-            @Override
-            public ChannelPipeline getPipeline() throws Exception {
-                final ChannelPipeline pipeline = pipeline();
-                pipeline.addLast("filterHandler", filterHandler);
-
-//                pipeline.addLast("logger", new SimpleChannelUpstreamHandler() {
-//					@Override
-//					public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e)
-//							throws Exception {
-//
-//						Object msg = e.getMessage();
-//
-//						if (msg instanceof ChannelBuffer) {
-//
-//							if (log.isDebugEnabled()) {
-//								ChannelBuffer b = (ChannelBuffer) msg;
-//								log.debug("{} => {}",
-//										e.getRemoteAddress(),
-//										StringUtils.replaceNonPrintableAsciiCharacters(b.toString(CharsetUtil.UTF_8))
-//								);
-//							}
-//
-//						} else {
-//
-//							log.debug("{} => {}", e.getRemoteAddress(), e.getMessage());
-//						}
-//
-//						super.messageReceived(ctx, e);
-//					}
-//				}
-//				);
-                return pipeline;
-            }
-        });
-
-
+    public void connect(){
         final ChannelFuture connectFuture = bootstrap.connect(
 				new WisebedTestbedAddress(protobufHost, protobufPort, secretReservationKeys)
 		);
@@ -128,4 +95,11 @@ public class TestbedConnector {
         channel.write(command);
     }
 
+    public ClientBootstrap getBootstrap() {
+        return bootstrap;
+    }
+
+    public void setBootstrap(ClientBootstrap bootstrap) {
+        this.bootstrap = bootstrap;
+    }
 }

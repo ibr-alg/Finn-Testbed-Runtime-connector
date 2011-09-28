@@ -17,7 +17,7 @@
 
     <handler name="Tile-Events-Handler" factory="Tile-Events-Handler" />
 
-	<handler name="logging-handler" factory="logging-handler" />
+	<!--handler name="logging-handler" factory="logging-handler" /-->
 
 	<handler name="isense-packet" factory="isense-packet" />
 

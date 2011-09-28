@@ -1,6 +1,10 @@
 package de.tubs.cs.ibr.finn.engine;
 
+import de.tubs.cs.ibr.finn.station.FinnRemoteInterface;
 import eu.funinnumbers.station.rmi.StationInterface;
+
+import java.util.Collection;
+import java.util.Vector;
 
 /**
  * Created by IntelliJ IDEA.
@@ -54,6 +58,17 @@ public final class EngineManager {
             return (StationInterface) stationInterface;
         }
         return null;
+    }
+
+    public Collection<FinnRemoteInterface> getTRStations() {
+        Collection<FinnRemoteInterface> out = new Vector<FinnRemoteInterface>();
+        for (StationInterface stationInterface : thisEngine.getStationInterface()) {
+            if (stationInterface instanceof FinnRemoteInterface) {
+                FinnRemoteInterface trStation = (FinnRemoteInterface) stationInterface;
+                out.add(trStation);
+            }
+        }
+        return out;
     }
 
 
